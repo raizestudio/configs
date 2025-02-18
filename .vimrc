@@ -22,6 +22,7 @@ Plugin 'https://github.com/tpope/vim-surround.git'
 Plugin 'scrooloose/syntastic'
 Plugin 'raimondi/delimitmate'
 Plugin 'kien/rainbow_parentheses.vim'
+Plugin 'https://github.com/ctrlpvim/ctrlp.vim.git'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
