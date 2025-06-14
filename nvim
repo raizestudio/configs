@@ -1,0 +1,110 @@
+-- Cross-platform Lazy bootstrap
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if vim.fn.has("win32") == 1 then
+  lazypath = vim.fn.stdpath("data") .. "\\lazy\\lazy.nvim"
+end
+
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git", "clone", "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim",
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+-- Plugins
+require("lazy").setup({
+  -- Theme
+  { "folke/tokyonight.nvim", lazy = false, priority = 1000 },
+
+  -- File explorer and icons
+  { "nvim-tree/nvim-tree.lua" },
+  { "nvim-tree/nvim-web-devicons" },
+
+  -- Telescope fuzzy finder
+  { "nvim-telescope/telescope.nvim", tag = "0.1.5", dependencies = { "nvim-lua/plenary.nvim" } },
+
+  -- LSP and Autocompletion
+  { "neovim/nvim-lspconfig",
+    config = function()
+    local lspconfig = require("lspconfig")
+
+    -- Python LSP
+    lspconfig.pyright.setup({})
+
+    -- You can also keep other language servers here
+    -- Example:
+    -- lspconfig.tsserver.setup({})
+    end,
+  },
+  { "hrsh7th/nvim-cmp" },
+  { "hrsh7th/cmp-nvim-lsp" },
+  { "L3MON4D3/LuaSnip" },
+
+  -- Copilot with cmp integration
+  {
+    "zbirenbaum/copilot.lua",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({
+        suggestion = { enabled = true, auto_trigger = true },
+        panel = { enabled = false },
+      })
+    end,
+  },
+  {
+    "zbirenbaum/copilot-cmp",
+    dependencies = { "zbirenbaum/copilot.lua" },
+    config = function()
+      require("copilot_cmp").setup()
+    end,
+  },
+   -- 🧠 Treesitter syntax highlighting
+  {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    config = function()
+      require("nvim-treesitter.configs").setup({
+        ensure_installed = {
+          "lua", "python", "json", "bash", "vim", "markdown"
+        },
+        highlight = { enable = true },
+        indent = { enable = true },
+        auto_install = true,
+      })
+    end,
+  },
+})
+
+-- Basic settings
+vim.cmd.colorscheme("tokyonight-night")
+vim.o.number = true
+vim.o.relativenumber = true
+
+-- Setup nvim-cmp with copilot source
+local cmp = require("cmp")
+
+cmp.setup({
+  snippet = {
+    expand = function(args)
+      require("luasnip").lsp_expand(args.body)
+    end,
+  },
+  mapping = cmp.mapping.preset.insert({
+    ["<CR>"] = cmp.mapping.confirm({ select = true }),
+  }),
+  sources = cmp.config.sources({
+    { name = "copilot" },
+    { name = "nvim_lsp" },
+    { name = "luasnip" },
+  }, {
+    { name = "buffer" },
+    { name = "path" },
+  }),
+})
+
+-- Keymap to accept copilot inline suggestions
+vim.api.nvim_set_keymap("i", "<C-l>", 'copilot#Accept("")', { expr = true, silent = true, noremap = true })
+
+
