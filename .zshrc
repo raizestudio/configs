@@ -1,10 +1,3 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
@@ -15,7 +8,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="powerlevel10k/powerlevel10k"
+ZSH_THEME=""
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -35,8 +28,11 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # zstyle ':omz:update' mode auto      # update automatically without asking
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
-# Uncomment the following line to change how often to auto-update (in days).
+# Uncomment the following line to change the frequency the auto-updater is run (in days).
 # zstyle ':omz:update' frequency 13
+
+# Uncomment the following line to set how old an update must be before it's applied, manually or via the auto-updater (in days).
+# zstyle ':omz:update' cooldown 10
 
 # Uncomment the following line if pasting URLs and other text is messed up.
 # DISABLE_MAGIC_FUNCTIONS="true"
@@ -77,7 +73,16 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-autosuggestions zsh-syntax-highlighting you-should-use zsh-bat)
+plugins=(
+  git
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+  docker
+  docker-compose
+)
+
+# --- Starship Prompt ---
+eval "$(starship init zsh)"
 
 source $ZSH/oh-my-zsh.sh
 
@@ -109,12 +114,28 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-fpath=(~/.zsh/completions $fpath)
-autoload -U compinit && compinit
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# --- Aliases ---
+alias ll='eza -l --icons'
+alias la='eza -la --icons'
+alias gs='git status'
+alias gp='git push'
+alias python='python3'
+alias pip='pip3'
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+# fnm
+FNM_PATH="/opt/homebrew/opt/fnm/bin"
+if [ -d "$FNM_PATH" ]; then
+  eval "$(fnm env --shell zsh)"
+fi
+eval "$(/opt/homebrew/bin/brew shellenv)"
+eval "$(fnm env --use-on-cd)"
+export STARSHIP_CONFIG="$HOME/.config/starship.toml"
+
+# pnpm
+export PNPM_HOME='/Users/liloujeudy/Library/pnpm'
+case ":$PATH:" in
+  *":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
+# pnpm end
